@@ -1,0 +1,45 @@
+#!/bin/bash
+#Script:    Challenge Ops 05
+#Author:    Cristiano Garcia
+#Date:      13/10/2023
+
+backup_dir="/var/log/backups"
+timestamp=$(date +"%Y%m%d%H%M%S")
+
+#Diretório dos ficheiros
+log_files=(
+  "/var/log/syslog"
+  "/var/log/wtmp"
+)
+
+#Criar diretório do backup
+mkdir -p "$backup_dir"
+
+
+declare -a original_sizes
+
+#Tamanhos originais antes da compressão
+for file in "${log_files[@]}"; do
+original_sizes[$file]=$(du -b "$file" | awk '{print $1}')
+done
+
+#Comprimir ficheiros
+for file in "${log_files[@]}"; do
+  #Tamanho original
+  original_size=${original_sizes[$file]}
+  
+  #Ficheiro comprimido
+  filename=$(basename "$file")
+  gzip -c "$file" > "$backup_dir/$filename-$timestamp.gz"
+
+  # Apagar o original 
+  rm "$file"
+
+  #Ir buscar o ficheiro comprimido
+  compressed_size=$(du -b "$backup_dir/$filename-$timestamp.gz" | awk '{print $1}')
+
+  #Comparação.
+  echo "Original size of $file: $original_size"
+  echo "Compressed size of $file: $compressed_size"
+
+done
