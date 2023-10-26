@@ -6,39 +6,39 @@
 backup_dir="/var/log/backups"
 timestamp=$(date +"%Y%m%d%H%M%S")
 
-#Diretório dos ficheiros
+#Files directory
 log_files=(
   "/var/log/syslog"
   "/var/log/wtmp"
 )
 
-#Criar diretório do backup
+#Create backup directory
 mkdir -p "$backup_dir"
 
 
 declare -a original_sizes
 
-#Tamanhos originais antes da compressão
+#File sizes before compression
 for file in "${log_files[@]}"; do
 original_sizes[$file]=$(du -b "$file" | awk '{print $1}')
 done
 
-#Comprimir ficheiros
+#Compress files
 for file in "${log_files[@]}"; do
   #Tamanho original
   original_size=${original_sizes[$file]}
   
-  #Ficheiro comprimido
+  #File compressed
   filename=$(basename "$file")
   gzip -c "$file" > "$backup_dir/$filename-$timestamp.gz"
 
-  # Apagar o original 
+  #Erase original 
   rm "$file"
 
-  #Ir buscar o ficheiro comprimido
+  #Get compressed file
   compressed_size=$(du -b "$backup_dir/$filename-$timestamp.gz" | awk '{print $1}')
 
-  #Comparação.
+  #Compare.
   echo "Original size of $file: $original_size"
   echo "Compressed size of $file: $compressed_size"
 
